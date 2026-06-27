@@ -1,22 +1,23 @@
-#ifndef SERVER_H  //防止头文件重复包含的宏定义开始
-#define SERVER_H  //定义头文件保护宏
+#ifndef SERVER_H
+#define SERVER_H
 
-#include "global.h"  //包含全局头文件，引入所需的标准库和网络库
-
-using namespace std;  //使用std命名空间，简化标准库的使用
-
-class Server{  //定义服务器类
-    private:  //私有成员变量区域
-        int server_fd; //服务器套接字文件描述符，用于监听客户端连接
-        vector<int> client_fds; //客户端套接字列表，存储所有已连接客户端的文件描述符
-        struct sockaddr_in server_addr; //服务器地址结构体，存储服务器网络地址信息
-        const char* ip; //服务器IP地址字符串指针
-        int port;  //服务器端口号
-    public:  //公共成员函数区域
-        Server(const char* ip,int port); //带参构造函数，使用指定ip和端口初始化服务器
-        ~Server();  //析构函数，关闭服务器和所有客户端套接字
-        int run(); //监听客户端连接并处理消息，成功返回0，错误返回-1
-        void handle_client(int client_fd); //处理单个客户端消息的函数，参数为客户端套接字
+#include "global.h"
+class server{
+    private:
+        int server_port;//服务器端口号
+        int server_sockfd;//设为listen状态的套接字描述符
+        string server_ip;//服务器ip
+        static vector<bool> sock_arr;//保存所有套接字描述符
+        static unordered_map<string,int> name_sock_map;//名字和套接字描述符
+        static mutex name_sock_mutx;//互斥锁，锁住需要修改name_sock_map的临界区
+        static unordered_map<int,set<int>> group_map;//记录群号和套接字描述符集合
+        static mutex group_mutex;//group_map的互斥锁
+    public:
+        server(int port,string ip);//构造函数
+        ~server();//析构函数
+        void run();//服务器开始服务
+        static void RecvMsg(int conn);//子线程工作的静态函数
+        static void HandleRequest(int conn,string str,tuple<bool,string,string,int,int> &info);
 };
 
-#endif // SERVER_H  //防止头文件重复包含的宏定义结束
+#endif
