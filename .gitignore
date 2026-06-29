@@ -4,6 +4,10 @@
 *.exe
 *.txt
 a.out
+cookie.txt
+dump.rdb
+server
+client
 test_client
 test_server
 test_redis
